@@ -46,9 +46,9 @@ public class TCP extends Thread {
 			String message = in.readLine();
 			while (!message.equals("exit")) {
 				if (message != null && messageListener != null) {
-					messageListener.messageReceived("TCP", message, client.getInetAddress().toString(), client.getPort());
-					mOut.println("OK");
-					System.out.println("OK");
+					String response = messageListener.messageReceived("TCP", message, client.getInetAddress().toString(), client.getPort());
+					mOut.println(response);						
+					System.out.println(response);
 				}
 				message = in.readLine();
 
