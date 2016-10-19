@@ -47,16 +47,21 @@ public class TCP extends Thread {
 			while (!message.equals("exit")) {
 				if (message != null && messageListener != null) {
 					String response = messageListener.messageReceived("TCP", message, client.getInetAddress().toString(), client.getPort());
+					if (response.contains("OK")){
+						Lab6Server.listenUser(client.getInetAddress());
+					}
 					mOut.println(response);						
 					System.out.println(response);
 				}
 				message = in.readLine();
-
 			}
 		} catch (Exception e){
+			e.printStackTrace();
 		} finally {
 			try {
+				System.out.println("closing client");
 				client.close();
+				TCPReceiver.downClient();
 			} catch (IOException e) {
 				System.out.println("S: Error closing client");
 				e.printStackTrace();

@@ -1,40 +1,46 @@
 package main;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-
-import main.Lab6Server.OnMessageReceived;
+import java.net.InetAddress;
+import java.util.List;
 
 public class UDP extends Thread{
+	
+	private File video_file;
+	
+	private int broadcast_port;
 
-	private OnMessageReceived messageListener;
-
-	public UDP(OnMessageReceived messageListener){
-		this.messageListener = messageListener;
+	public UDP(int port, File f){
+		this.video_file = f;
+		broadcast_port = port;
 	}
 
 	@Override
 	public void run() {
 		try{
-			System.out.println("Starting UDP server...");
-			@SuppressWarnings("resource")
+			
+			byte[] video_chunk = new byte[1024];
+			
+			BufferedInputStream bis = new BufferedInputStream(new FileInputStream(video_file));
+			
 			DatagramSocket serverSocket = new DatagramSocket(9898);
-			byte[] receiveData = new byte[1024];
-			while(true)
+			@SuppressWarnings("unused")
+			int chunk_size = 0;
+			while((chunk_size = bis.read(video_chunk)) > 0)
 			{
-				DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-				serverSocket.receive(receivePacket);
-				String sentence = new String( receivePacket.getData());
-				if (sentence != null && messageListener != null) {
-					messageListener.messageReceived("UDP", sentence, receivePacket.getAddress().toString(), receivePacket.getPort());
-					byte [] sendData =  new byte[1024];
-					sendData = "OK".getBytes();
+				List<InetAddress> listeners = Lab6Server.getBroadcastGroup();
+				for (InetAddress client : listeners) {
 					DatagramPacket sendPacket =
-							new DatagramPacket(sendData, sendData.length, receivePacket.getAddress(), receivePacket.getPort());
+							new DatagramPacket(video_chunk, video_chunk.length, client, broadcast_port);
 					serverSocket.send(sendPacket);
-					System.out.println("OK");
 				}
 			}
+			bis.close();
+			serverSocket.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}

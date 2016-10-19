@@ -9,7 +9,7 @@ import main.Lab6Server.OnMessageReceived;
 
 public class TCPReceiver extends Thread{
 
-	public static final int SERVERPORT = 9090;
+	public static final int SERVERPORT = 55055;
 	private OnMessageReceived messageListener;
 
 	private static final int queue_max_size = 1000;
