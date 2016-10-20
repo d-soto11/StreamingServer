@@ -18,7 +18,7 @@ public class Lab6Server {
 	
 	private static final String history = "data/history/log.csv";
 	private static final Map<String, String> users = new HashMap<>();
-	private static final List<InetAddress> users_listening = new ArrayList<>();
+	private static final Map<Integer, UDP> streamers = new HashMap<>();
 	
 	private static final List<UDP> video_playlist = new ArrayList<>();
 
@@ -86,11 +86,38 @@ public class Lab6Server {
 				else if(mDecoded.contains("PLAYLIST")) {
 					return playlist();
 				}
-//				else if(){
-//					
-//				}
+				else if(mDecoded.contains("PORT")){
+					String video_name = mDecoded.split(":")[1];
+					int stream_port = getStreamPort(video_name);
+					if (stream_port>0){
+						listenUser(InetAddress.getByName(ip), ""+stream_port);
+						return "PORT:"+stream_port;
+					}
+					else{
+						return "ERROR: Video not found";
+					}
+				}
+				else if(mDecoded.contains("PLAY")){
+					String p = mDecoded.split(":")[1];
+					int _port = Integer.parseInt(p);
+					if (streamers.containsKey(_port)){
+						streamers.get(_port).play();
+					}
+					else{
+						return "ERROR: Video not found";
+					}
+				}
+				else if(mDecoded.contains("PAUSE")){
+					String p = mDecoded.split(":")[1];
+					int _port = Integer.parseInt(p);
+					if (streamers.containsKey(_port)){
+						streamers.get(_port).pause();
+					}
+					else{
+						return "ERROR: Video not found";
+					}
+				}
 				else{
-					System.out.println("decoded:"+mDecoded);
 					String user = mDecoded.split(":")[0];
 					String uToken = users.get(user);
 					
@@ -135,33 +162,39 @@ public class Lab6Server {
 		TCPReceiver tcp = new TCPReceiver(tcpAuthHandler);
 		tcp.start();
 		
-//		File video1 = new File("data/avatar.mp4");
-//		UDP streamer1 = new UDP(63491, video1);
-//		streamer1.start();
-//		video_playlist.add(streamer1);
-//		
-//		File video2 = new File("data/buddha.mp4");
-//		UDP streamer2 = new UDP(63491, video2);
-//		streamer2.start();
-//		video_playlist.add(streamer2);
-//		
-//		File video3 = new File("data/quantum.mp4");
-//		UDP streamer3 = new UDP(63491, video3);
-//		streamer3.start();
-//		video_playlist.add(streamer3);
+		File video1 = new File("data/avatar.mp4");
+		UDP streamer1 = new UDP(63491, video1);
+		streamer1.start();
+		video_playlist.add(streamer1);
+		streamers.put(63491, streamer1);
+		
+		File video2 = new File("data/buddha.mp4");
+		UDP streamer2 = new UDP(63492, video2);
+		streamer2.start();
+		video_playlist.add(streamer2);
+		streamers.put(63492, streamer2);
+		
+		File video3 = new File("data/quantum.mp4");
+		UDP streamer3 = new UDP(63493, video3);
+		streamer3.start();
+		video_playlist.add(streamer3);
+		streamers.put(63493, streamer2);
 		
 		
 	}
 	
 	
-	public static void listenUser(InetAddress ip){
-		if (!users_listening.contains(ip)){
-			users_listening.add(ip);
+	public static void listenUser(InetAddress ip, String p){
+		int port = Integer.parseInt(p);
+		if (!streamers.containsKey(port)){
+			streamers.get(port).registerUser(ip);
 		}
 	}
-	
-	public static List<InetAddress> getBroadcastGroup(){
-		return users_listening;
+	public static void stopListeningUser(InetAddress ip, String p){
+		int port = Integer.parseInt(p);
+		if (!streamers.containsKey(port)){
+			streamers.get(port).unregisterUser(ip);
+		}
 	}
 	
 	public static String playlist(){
@@ -172,6 +205,14 @@ public class Lab6Server {
 		return play;
 	}
 	
+	public static int getStreamPort(String name){
+		for (UDP stream : video_playlist) {
+			if (stream.name().equals(name)){
+				return stream.port();
+			}
+		}
+		return -1;
+	}
 	
 	public interface OnMessageReceived {
 		public String messageReceived(String type, String message, String ip, int port);

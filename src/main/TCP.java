@@ -47,8 +47,8 @@ public class TCP extends Thread {
 			while (!message.equals("exit")) {
 				if (message != null && messageListener != null) {
 					String response = messageListener.messageReceived("TCP", message, client.getInetAddress().toString(), client.getPort());
-					if (response.contains("OK")){
-						Lab6Server.listenUser(client.getInetAddress());
+					if (response.contains("PORT")){
+						Lab6Server.listenUser(client.getInetAddress(), response.split(":")[1]);
 					}
 					mOut.println(response);						
 					System.out.println(response);
