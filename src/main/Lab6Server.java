@@ -40,8 +40,9 @@ public class Lab6Server {
 		OnMessageReceived tcpAuthHandler = new OnMessageReceived() {
 			@Override
 			public String messageReceived(String type, String message, String ip, int port) {
-				String mDecoded = new String(Base64.getDecoder().decode(message));
-				
+				System.out.println(message);
+//				String mDecoded = new String(Base64.getDecoder().decode(message));
+				String mDecoded = message;
 				try {
 					String log = mDecoded.replace(",", "-");
 					CSVUtils.writeLine(writer, Arrays.asList(new Date().toString(), type, log, ip, port+""));
@@ -96,33 +97,11 @@ public class Lab6Server {
 						return "ERROR: Video not found";
 					}
 				}
-				else if(mDecoded.contains("PLAY")){
-					String p = mDecoded.split(":")[1];
-					int _port = Integer.parseInt(p);
-					if (streamers.containsKey(_port)){
-						streamers.get(_port).play();
-						return "OK";
-					}
-					else{
-						return "ERROR: Video not found";
-					}
-				}
-				else if(mDecoded.contains("PAUSE")){
-					String p = mDecoded.split(":")[1];
-					int _port = Integer.parseInt(p);
-					if (streamers.containsKey(_port)){
-						streamers.get(_port).pause();
-						return "OK";
-					}
-					else{
-						return "ERROR: Video not found";
-					}
-				}
-				else{
+				else if (mDecoded.contains(":")){
 					String user = mDecoded.split(":")[0];
 					String uToken = users.get(user);
 					
-					if(uToken.equals(message)){
+					if(uToken != null && uToken.equals(message)){
 						try {
 							String log = "User login succesfull";
 							CSVUtils.writeLine(writer, Arrays.asList(new Date().toString(), "SUCCESS", log));
@@ -156,6 +135,7 @@ public class Lab6Server {
 					
 					return "Error: Login not succesfull";
 				}
+				return "Error: Internal server error";
 				
 			}
 		};

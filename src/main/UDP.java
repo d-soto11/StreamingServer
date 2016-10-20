@@ -41,7 +41,7 @@ public class UDP extends Thread{
 			
 			BufferedInputStream bis = new BufferedInputStream(new FileInputStream(video_file));
 			
-			DatagramSocket serverSocket = new DatagramSocket(9898);
+			DatagramSocket serverSocket = new DatagramSocket();
 			@SuppressWarnings("unused")
 			int chunk_size = 0;
 			while((chunk_size = bis.read(video_chunk)) > 0)
