@@ -90,7 +90,6 @@ public class Lab6Server {
 					String video_name = mDecoded.split(":")[1];
 					int stream_port = getStreamPort(video_name);
 					if (stream_port>0){
-						listenUser(InetAddress.getByName(ip), ""+stream_port);
 						return "PORT:"+stream_port;
 					}
 					else{
@@ -102,6 +101,7 @@ public class Lab6Server {
 					int _port = Integer.parseInt(p);
 					if (streamers.containsKey(_port)){
 						streamers.get(_port).play();
+						return "OK";
 					}
 					else{
 						return "ERROR: Video not found";
@@ -112,6 +112,7 @@ public class Lab6Server {
 					int _port = Integer.parseInt(p);
 					if (streamers.containsKey(_port)){
 						streamers.get(_port).pause();
+						return "OK";
 					}
 					else{
 						return "ERROR: Video not found";
