@@ -19,6 +19,8 @@ public class Lab6Server {
 	private static final String history = "data/history/log.csv";
 	private static final Map<String, String> users = new HashMap<>();
 	private static final List<InetAddress> users_listening = new ArrayList<>();
+	
+	private static final List<UDP> video_playlist = new ArrayList<>();
 
 	public static void main(String[] args) throws Exception {
 		
@@ -81,11 +83,18 @@ public class Lab6Server {
 					
 					return token;
 				}
+				else if(mDecoded.contains("PLAYLIST")) {
+					return playlist();
+				}
+//				else if(){
+//					
+//				}
 				else{
+					System.out.println("decoded:"+mDecoded);
 					String user = mDecoded.split(":")[0];
 					String uToken = users.get(user);
 					
-					if(uToken.equals(mDecoded)){
+					if(uToken.equals(message)){
 						try {
 							String log = "User login succesfull";
 							CSVUtils.writeLine(writer, Arrays.asList(new Date().toString(), "SUCCESS", log));
@@ -126,9 +135,21 @@ public class Lab6Server {
 		TCPReceiver tcp = new TCPReceiver(tcpAuthHandler);
 		tcp.start();
 		
-		File video = new File("data/buddha.mp4");
-		UDP streamer = new UDP(63491, video);
-		streamer.start();
+//		File video1 = new File("data/avatar.mp4");
+//		UDP streamer1 = new UDP(63491, video1);
+//		streamer1.start();
+//		video_playlist.add(streamer1);
+//		
+//		File video2 = new File("data/buddha.mp4");
+//		UDP streamer2 = new UDP(63491, video2);
+//		streamer2.start();
+//		video_playlist.add(streamer2);
+//		
+//		File video3 = new File("data/quantum.mp4");
+//		UDP streamer3 = new UDP(63491, video3);
+//		streamer3.start();
+//		video_playlist.add(streamer3);
+		
 		
 	}
 	
@@ -141,6 +162,14 @@ public class Lab6Server {
 	
 	public static List<InetAddress> getBroadcastGroup(){
 		return users_listening;
+	}
+	
+	public static String playlist(){
+		String play = "PlAYLIST";
+		for (UDP stream : video_playlist) {
+			play+=(":"+stream.name());
+		}
+		return play;
 	}
 	
 	

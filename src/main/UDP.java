@@ -13,6 +13,9 @@ public class UDP extends Thread{
 	private File video_file;
 	
 	private int broadcast_port;
+	
+	public int port(){return broadcast_port;}
+	public String name(){return video_file.getName();}
 
 	public UDP(int port, File f){
 		this.video_file = f;
